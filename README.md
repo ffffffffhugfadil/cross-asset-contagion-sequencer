@@ -29,7 +29,7 @@ The **Cross-Asset Contagion Sequencer** analyzes historical lag correlations bet
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  INPUT                                                          │
-│  • Source asset stress detected (e.g., BTC -5% in 6h)          │
+│  • Source asset stress detected (e.g., BTC -5% in 6h)           │
 │  • 72h hourly returns for source + targets                      │
 │  • Derivatives OI + funding rates (optional amplifier)          │
 └─────────────────────────────────────────────────────────────────┘
@@ -47,7 +47,7 @@ The **Cross-Asset Contagion Sequencer** analyzes historical lag correlations bet
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  OUTPUT                                                         │
-│  • Contagion sequence: BTC → ETH(+2h) → BNB(+5h) → CAKE(+9h)  │
+│  • Contagion sequence: BTC → ETH(+2h) → BNB(+5h) → CAKE(+9h)    │
 │  • Impact score per asset (0.0 – 1.0)                           │
 │  • Actionable signals per position                              │
 │  • Confidence level (HIGH / MEDIUM / LOW)                       │
@@ -243,36 +243,54 @@ The Skill works with Binance data alone. CMC API provides optional enhancements.
 
 ```
 cross-asset-contagion-sequencer/
+│
 ├── core/
-│   ├── sequencer.py          # Main pipeline — contagion sequence prediction
-│   ├── correlation.py        # Rolling correlation matrix
-│   ├── lag_detector.py       # Cross-correlation lag detection (0–48h)
-│   ├── stress_detector.py    # Source asset stress detection
-│   └── scorer.py             # Confidence scoring
+│   ├── __init__.py               # UPDATE: Meng-ekspos pipeline utama (Sequencer, LagDetector, dll)
+│   ├── sequencer.py              # Main pipeline — contagion sequence prediction
+│   ├── correlation.py            # Rolling correlation matrix
+│   ├── lag_detector.py           # Cross-correlation lag detection (0–48h)
+│   ├── stress_detector.py        # Source asset stress detection
+│   └── scorer.py                 # Confidence scoring
+│
 ├── data/
-│   ├── fetcher.py            # CMC API (quotes, global metrics, derivatives)
-│   ├── fetcher_binance.py    # Binance API (historical OHLCV, free)
-│   ├── preprocessor.py       # Normalize returns, align timestamps
-│   └── cache.py              # Local cache to avoid rate limits
+│   ├── __init__.py               # UPDATE: Meng-ekspos data fetcher & preprocessor
+│   ├── fetcher.py                # CMC API (quotes, global metrics, derivatives)
+│   ├── fetcher_binance.py        # Binance API (historical OHLCV, free)
+│   ├── preprocessor.py           # Normalize returns, align timestamps
+│   └── cache.py                  # Local cache to avoid rate limits
+│
 ├── strategy/
-│   ├── signal_generator.py   # EXIT_NOW / REDUCE / WATCH / HOLD
-│   ├── risk_filter.py        # Fear & Greed + OI filter
-│   └── output_formatter.py   # LLM-ready JSON output
+│   ├── __init__.py               # UPDATE: Meng-ekspos signal_generator & risk_filter
+│   ├── signal_generator.py       # EXIT_NOW / REDUCE / WATCH / HOLD
+│   ├── risk_filter.py            # Fear & Greed + OI filter
+│   └── output_formatter.py       # LLM-ready JSON output
+│
 ├── backtest/
-│   ├── events/               # FTX, LUNA, 3AC historical event data
-│   ├── metrics.py            # Accuracy, early warning, false positive rate
-│   ├── runner.py             # Run all backtest events
+│   ├── __init__.py               # UPDATE: Meng-ekspos runner & metrics historis
+│   ├── events/                   # FTX, LUNA, 3AC historical event data
+│   ├── metrics.py                # Accuracy, early warning, false positive rate
+│   ├── runner.py                 # Run all backtest events
 │   └── results/
 │       └── summary_metrics.json
+│
 ├── demo/
-│   ├── demo.py               # Interactive demo script
-│   ├── demo_crash.py         # Backtest demo for hackathon submission
-│   ├── visualizer.py         # Heatmap + timeline chart
-│   └── sample_output.json    # Example JSON output
+│   ├── demo.py                   # Interactive demo script
+│   ├── demo_crash.py             # Backtest demo for hackathon submission
+│   ├── visualizer.py             # Heatmap + timeline chart
+│   └── sample_output.json        # Example JSON output
+│
 ├── tests/
-├── skill.json
-├── requirements.txt
-└── .env.example
+│   ├── __init__.py               # UPDATE: File kosong (0 bytes) agar pytest mengenali modul tests
+│   ├── test_correlation.py       # Unit test untuk rolling correlation matrix
+│   ├── test_lag_detector.py      # Unit test untuk lag detector 0-48h
+│   ├── test_output_formatter.py  # Unit test untuk output JSON formatter
+│   ├── test_risk_filter.py       # Unit test untuk Fear & Greed + OI filter
+│   ├── test_sequencer.py         # Unit test untuk main pipeline sequencer
+│   └── test_signal_generator.py  # Unit test untuk penghasil sinyal (EXIT/REDUCE/WATCH)
+│
+├── skill.json                    # Konfigurasi skill/metadata agent
+├── requirements.txt              # Dependensi pihak ketiga (pandas, numpy, requests, pytest, dll)
+└── .env.example                  # Contoh konfigurasi environment variable (API Keys)
 ```
 
 ---
