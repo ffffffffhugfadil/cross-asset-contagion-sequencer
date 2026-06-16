@@ -1,0 +1,60 @@
+cat > demo/sample_output.json << 'EOF'
+{
+  "contagion_detected": true,
+  "source_asset": "BTC",
+  "stress_severity": "CRITICAL",
+  "overall_confidence": "HIGH",
+  "estimated_spread_window_hours": 18.0,
+  "timestamp": "2026-06-16T12:00:00Z",
+  "contagion_sequence": [
+    {
+      "symbol": "ETH",
+      "sequence_position": 1,
+      "estimated_lag_hours": 2.0,
+      "impact_score": 0.94,
+      "signal": "EXIT_NOW",
+      "correlation_at_lag": 0.89,
+      "confidence": 0.92
+    },
+    {
+      "symbol": "BNB",
+      "sequence_position": 2,
+      "estimated_lag_hours": 5.0,
+      "impact_score": 0.88,
+      "signal": "EXIT_NOW",
+      "correlation_at_lag": 0.81,
+      "confidence": 0.85
+    },
+    {
+      "symbol": "CAKE",
+      "sequence_position": 3,
+      "estimated_lag_hours": 9.0,
+      "impact_score": 0.71,
+      "signal": "REDUCE",
+      "correlation_at_lag": 0.67,
+      "confidence": 0.73
+    },
+    {
+      "symbol": "LINK",
+      "sequence_position": 4,
+      "estimated_lag_hours": 14.0,
+      "impact_score": 0.58,
+      "signal": "WATCH",
+      "correlation_at_lag": 0.54,
+      "confidence": 0.62
+    },
+    {
+      "symbol": "ADA",
+      "sequence_position": 5,
+      "estimated_lag_hours": 18.0,
+      "impact_score": 0.52,
+      "signal": "WATCH",
+      "correlation_at_lag": 0.48,
+      "confidence": 0.58
+    }
+  ],
+  "summary": "BTC stress detected (CRITICAL). Contagion predicted across 5 assets over 18.0 hours. Confidence: HIGH.",
+  "reasoning": "BTC is showing CRITICAL stress with -5.8% cumulative drop over 6 hours. Historical lag analysis predicts contagion spread: BTC -> ETH(+2h) -> BNB(+5h) -> CAKE(+9h) -> LINK(+14h) -> ADA(+18h).",
+  "data_quality_flags": []
+}
+EOF

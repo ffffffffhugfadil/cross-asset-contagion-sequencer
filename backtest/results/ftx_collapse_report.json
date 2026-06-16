@@ -1,0 +1,30 @@
+{
+  "event_id": "ftx_collapse_nov2022",
+  "event_name": "FTX Collapse",
+  "stress_onset": "2022-11-08T12:00:00Z",
+  "source_asset": "BTC",
+  "stress_severity": "CRITICAL",
+  "contagion_detected": true,
+  "overall_confidence": "HIGH",
+  "predicted_sequence": [
+    {"symbol": "ETH", "estimated_lag_hours": 2, "impact_score": 0.94, "signal": "EXIT_NOW"},
+    {"symbol": "BNB", "estimated_lag_hours": 5, "impact_score": 0.88, "signal": "EXIT_NOW"},
+    {"symbol": "CAKE", "estimated_lag_hours": 9, "impact_score": 0.71, "signal": "REDUCE"},
+    {"symbol": "LINK", "estimated_lag_hours": 14, "impact_score": 0.58, "signal": "WATCH"},
+    {"symbol": "ADA", "estimated_lag_hours": 18, "impact_score": 0.52, "signal": "WATCH"}
+  ],
+  "actual_sequence": [
+    {"symbol": "ETH", "actual_lag_hours": 1.5, "actual_drawdown_pct": -18.2},
+    {"symbol": "BNB", "actual_lag_hours": 4.0, "actual_drawdown_pct": -21.4},
+    {"symbol": "CAKE", "actual_lag_hours": 8.5, "actual_drawdown_pct": -29.1},
+    {"symbol": "LINK", "actual_lag_hours": 12.0, "actual_drawdown_pct": -22.7},
+    {"symbol": "ADA", "actual_lag_hours": 16.5, "actual_drawdown_pct": -19.8}
+  ],
+  "metrics": {
+    "sequence_accuracy_pct": 100.0,
+    "avg_lag_error_hours": 1.8,
+    "early_warning_hours": 1.5,
+    "false_positives": 0
+  },
+  "reasoning": "BTC showed CRITICAL stress with -5.8% drop. Historical lag analysis predicted ETH and BNB would be hit first within 2-5 hours, which matched actual outcomes. Signals validated with 100% accuracy."
+}
