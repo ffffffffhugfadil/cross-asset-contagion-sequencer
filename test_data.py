@@ -1,38 +1,55 @@
+"""
+test_data.py
+============
+Test script to fetch and display real-time market data from Binance and CMC APIs.
+
+Displays 24-hour returns for multiple assets from Binance (free, no API key)
+and latest quotes from CMC API (optional, requires API key).
+"""
+
 from data.fetcher_binance import get_returns_with_timestamps
 from data.fetcher import CMCFetcher
 
-print('=' * 50)
-print('📊 DATA ASLI CAKE & LINK')
-print('=' * 50)
+# Assets to display
+ASSETS = ['BTC', 'ETH', 'BNB', 'SOL', 'ADA', 'CAKE', 'LINK']
 
-# Binance API - CAKE
-cake_returns, cake_ts = get_returns_with_timestamps('CAKE', hours=24)
-if cake_returns:
-    print(f'\n🍰 CAKE (PancakeSwap) - Binance')
-    print(f'   Data points: {len(cake_returns)} jam')
-    print(f'   Last price: ${cake_returns[-1]:.4f}')
-    print(f'   24h change: {(sum(cake_returns) * 100):.2f}%')
-else:
-    print('\n🍰 CAKE: Gagal ambil data')
+print('=' * 60)
+print('📊 REAL-TIME MARKET DATA')
+print('=' * 60)
 
-# Binance API - LINK
-link_returns, link_ts = get_returns_with_timestamps('LINK', hours=24)
-if link_returns:
-    print(f'\n🔗 LINK (Chainlink) - Binance')
-    print(f'   Data points: {len(link_returns)} jam')
-    print(f'   Last price: ${link_returns[-1]:.4f}')
-    print(f'   24h change: {(sum(link_returns) * 100):.2f}%')
-else:
-    print('\n🔗 LINK: Gagal ambil data')
+# ============================================
+# 1. BINANCE API (FREE, NO API KEY REQUIRED)
+# ============================================
+print('\n' + '=' * 60)
+print('📡 BINANCE API - 24h Returns')
+print('=' * 60)
+print(f'  Source: Binance Public API (free, no API key)')
+print('-' * 60)
 
-# CMC API - CAKE & LINK
+for symbol in ASSETS:
+    returns, ts = get_returns_with_timestamps(symbol, hours=24)
+    if returns:
+        total_change = sum(returns) * 100
+        last_price = returns[-1]
+        print(f'\n🔹 {symbol}')
+        print(f'   Data points: {len(returns)} hours')
+        print(f'   Last price: ${last_price:.4f}')
+        print(f'   24h change: {total_change:.2f}%')
+    else:
+        print(f'\n❌ {symbol}: Failed to fetch data')
+
+# ============================================
+# 2. CMC API (OPTIONAL, REQUIRES API KEY)
+# ============================================
+print('\n' + '=' * 60)
+print('📊 CMC API - Latest Quotes')
+print('=' * 60)
+print(f'  Source: CoinMarketCap API (optional, requires API key)')
+print('-' * 60)
+
 try:
     fetcher = CMCFetcher()
-    quotes = fetcher.get_latest_quotes(['CAKE', 'LINK'])
-    
-    print('\n' + '=' * 50)
-    print('📊 DATA DARI CMC API')
-    print('=' * 50)
+    quotes = fetcher.get_latest_quotes(ASSETS)
     
     for symbol, q in quotes.items():
         if q:
@@ -46,5 +63,22 @@ try:
             print(f'   24h Volume: ${volume:,.0f}')
             print(f'   Market Cap: ${market_cap:,.0f}')
             print(f'   24h Change: {change:.2f}%')
+        else:
+            print(f'\n❌ {symbol}: Data not available')
+            
 except Exception as e:
     print(f'\n❌ CMC API error: {e}')
+    print('   (CMC API key may not be set in .env file)')
+
+# ============================================
+# 3. SUMMARY
+# ============================================
+print('\n' + '=' * 60)
+print('📊 SUMMARY')
+print('=' * 60)
+print(f'  Total assets displayed: {len(ASSETS)}')
+print(f'  Data sources: Binance (free) + CMC (optional)')
+print(f'  Time window: 24 hours')
+print('=' * 60)
+
+print('\n✅ Test complete!')
