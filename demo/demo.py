@@ -39,7 +39,7 @@ def print_help():
     print("  ─────────────────────────────────────────────")
     print("  live       - Run with live Binance data")
     print("  backtest   - Show backtest results (FTX, LUNA, 3AC)")
-    print("  charts     - Generate visualization charts only")
+    print("  charts     - Generate all visualization charts (13 files)")
     print("  autodemo   - 🎬 AUTO-DEMO mode for presentation")
     print("  help       - Show this message")
     print("  exit       - Exit demo")
@@ -47,20 +47,13 @@ def print_help():
 
 
 def generate_charts_only():
-    """Generate charts without running full demo."""
-    print("\n🎨 GENERATING CHARTS ONLY")
+    """Generate all charts (FTX, LUNA, 3AC, and sample) - 13 files total."""
+    print("\n🎨 GENERATING ALL CHARTS (13 FILES)")
     print("-" * 50)
     
-    # Sample data from FTX
-    sample_sequence = [
-        {'symbol': 'ETH', 'estimated_lag_hours': 2.0, 'impact_score': 0.94, 'signal': 'EXIT_NOW'},
-        {'symbol': 'BNB', 'estimated_lag_hours': 5.0, 'impact_score': 0.88, 'signal': 'EXIT_NOW'},
-        {'symbol': 'CAKE', 'estimated_lag_hours': 9.0, 'impact_score': 0.71, 'signal': 'REDUCE'},
-        {'symbol': 'LINK', 'estimated_lag_hours': 14.0, 'impact_score': 0.58, 'signal': 'WATCH'},
-        {'symbol': 'ADA', 'estimated_lag_hours': 18.0, 'impact_score': 0.52, 'signal': 'WATCH'},
-    ]
-    
     try:
+        import json
+        import os
         from demo.visualizer import ContagionVisualizer
         
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -69,26 +62,101 @@ def generate_charts_only():
         
         viz = ContagionVisualizer(style='dark_background')
         
-        print("   📈 Generating sample sequence chart...")
-        viz.plot_contagion_sequence(
-            sample_sequence,
-            title="Sample: Contagion Sequence",
-            save_path=os.path.join(images_dir, 'sample_sequence.png')
-        )
+        # ============================================================
+        # 1. GENERATE FTX, LUNA, 3AC CHARTS FROM BACKTEST DATA
+        # ============================================================
+        json_path = os.path.join(base_dir, 'backtest', 'results', 'summary_metrics.json')
+        
+        if os.path.exists(json_path):
+            with open(json_path, 'r') as f:
+                data = json.load(f)
+            
+            name_map = {
+                'FTX Collapse': 'ftx_collapse',
+                'LUNA / UST Depeg Collapse': 'luna_ust_depeg_collapse',
+                '3AC / Celsius Contagion': '3ac_celsius_contagion'
+            }
+            
+            print("\n   📊 Generating backtest charts...")
+            
+            for event in data['events']:
+                name = event['event_name']
+                predicted = event['predicted_sequence']
+                actual = event['actual_sequence']
+                
+                pred_data = [
+                    {'symbol': p['symbol'], 'estimated_lag_hours': p['estimated_lag_hours']}
+                    for p in predicted
+                ]
+                
+                actual_data = [
+                    {'symbol': a['symbol'], 'actual_lag_hours': a['actual_lag_hours']}
+                    for a in actual
+                ]
+                
+                impact_data = [
+                    {'symbol': p['symbol'], 'impact_score': p['impact_score'], 'signal': 'WATCH'}
+                    for p in predicted
+                ]
+                
+                safe_name = name_map.get(name, name.lower().replace(' / ', '_').replace('/', '_').replace(' ', '_'))
+                
+                print(f"      📈 {name}...")
+                
+                viz.plot_contagion_sequence(
+                    pred_data,
+                    actual_sequence=actual_data,
+                    title=f"{name}: Contagion Sequence",
+                    save_path=os.path.join(images_dir, f'{safe_name}_sequence.png')
+                )
+                
+                viz.plot_impact_scores(
+                    impact_data,
+                    title=f"{name}: Impact Scores",
+                    save_path=os.path.join(images_dir, f'{safe_name}_impact.png')
+                )
+                
+                viz.plot_timeline(
+                    pred_data,
+                    source_asset='BTC',
+                    title=f"{name}: Spread Timeline",
+                    save_path=os.path.join(images_dir, f'{safe_name}_timeline.png')
+                )
+            
+            print("      ✅ Backtest charts generated (9 files)")
+        else:
+            print("   ⚠️ summary_metrics.json not found - skipping backtest charts")
+        
+        # ============================================================
+        # 2. GENERATE SAMPLE CHARTS
+        # ============================================================
+        print("\n   📊 Generating sample charts...")
+        
+        sample_sequence = [
+            {'symbol': 'ETH', 'estimated_lag_hours': 2.0, 'impact_score': 0.94, 'signal': 'EXIT_NOW'},
+            {'symbol': 'BNB', 'estimated_lag_hours': 5.0, 'impact_score': 0.88, 'signal': 'EXIT_NOW'},
+            {'symbol': 'CAKE', 'estimated_lag_hours': 9.0, 'impact_score': 0.71, 'signal': 'REDUCE'},
+            {'symbol': 'LINK', 'estimated_lag_hours': 14.0, 'impact_score': 0.58, 'signal': 'WATCH'},
+            {'symbol': 'ADA', 'estimated_lag_hours': 18.0, 'impact_score': 0.52, 'signal': 'WATCH'},
+        ]
         
         impact_data = [
             {'symbol': s['symbol'], 'impact_score': s['impact_score'], 'signal': s['signal']}
             for s in sample_sequence
         ]
         
-        print("   📊 Generating sample impact chart...")
+        viz.plot_contagion_sequence(
+            sample_sequence,
+            title="Sample: Contagion Sequence",
+            save_path=os.path.join(images_dir, 'sample_sequence.png')
+        )
+        
         viz.plot_impact_scores(
             impact_data,
             title="Sample: Impact Scores",
             save_path=os.path.join(images_dir, 'sample_impact.png')
         )
         
-        print("   ⏱️ Generating sample timeline...")
         viz.plot_timeline(
             sample_sequence,
             source_asset='BTC',
@@ -96,7 +164,6 @@ def generate_charts_only():
             save_path=os.path.join(images_dir, 'sample_timeline.png')
         )
         
-        print("   🎯 Generating combined figure...")
         viz.create_demo_figure(
             sample_sequence,
             impact_data,
@@ -104,12 +171,19 @@ def generate_charts_only():
             save_path=os.path.join(images_dir, 'sample_combined.png')
         )
         
-        print(f"\n   ✅ Sample charts saved to: {images_dir}/")
-        print("   📁 Files generated:")
-        print(f"      - {images_dir}/sample_sequence.png")
-        print(f"      - {images_dir}/sample_impact.png")
-        print(f"      - {images_dir}/sample_timeline.png")
-        print(f"      - {images_dir}/sample_combined.png")
+        print("      ✅ Sample charts generated (4 files)")
+        
+        # ============================================================
+        # 3. SUMMARY
+        # ============================================================
+        print(f"\n   ✅ All charts saved to: {images_dir}/")
+        print("   📁 Files generated (13 files):")
+        
+        files = sorted([f for f in os.listdir(images_dir) if f.endswith('.png')])
+        for f in files:
+            print(f"      - {f}")
+        
+        print(f"\n   📊 TOTAL: {len(files)} charts")
         
     except ImportError:
         print("   ❌ matplotlib not installed.")
