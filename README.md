@@ -245,55 +245,57 @@ The Skill works with Binance data alone. CMC API provides optional enhancements.
 cross-asset-contagion-sequencer/
 │
 ├── core/
-│   ├── __init__.py               # UPDATE: Meng-ekspos pipeline utama (Sequencer, LagDetector, dll)
-│   ├── sequencer.py              # Main pipeline — contagion sequence prediction
-│   ├── correlation.py            # Rolling correlation matrix
-│   ├── lag_detector.py           # Cross-correlation lag detection (0–48h)
-│   ├── stress_detector.py        # Source asset stress detection
-│   └── scorer.py                 # Confidence scoring
+│   ├── __init__.py                # UPDATE: Exposes main pipeline (Sequencer, LagDetector, etc.)
+│   ├── sequencer.py               # Main pipeline — contagion sequence prediction
+│   ├── correlation.py             # Rolling correlation matrix
+│   ├── lag_detector.py            # Cross-correlation lag detection (0–48h)
+│   ├── stress_detector.py         # Source asset stress detection
+│   └── scorer.py                  # Confidence scoring
 │
 ├── data/
-│   ├── __init__.py               # UPDATE: Meng-ekspos data fetcher & preprocessor
-│   ├── fetcher.py                # CMC API (quotes, global metrics, derivatives)
-│   ├── fetcher_binance.py        # Binance API (historical OHLCV, free)
-│   ├── preprocessor.py           # Normalize returns, align timestamps
-│   └── cache.py                  # Local cache to avoid rate limits
+│   ├── __init__.py                # UPDATE: Exposes data fetcher & preprocessor
+│   ├── fetcher.py                 # CMC API (quotes, global metrics, derivatives)
+│   ├── fetcher_binance.py         # Binance API (historical OHLCV, free)
+│   ├── preprocessor.py            # Normalize returns, align timestamps
+│   └── cache.py                   # Local cache to avoid rate limits
 │
 ├── strategy/
-│   ├── __init__.py               # UPDATE: Meng-ekspos signal_generator & risk_filter
-│   ├── signal_generator.py       # EXIT_NOW / REDUCE / WATCH / HOLD
-│   ├── risk_filter.py            # Fear & Greed + OI filter
-│   └── output_formatter.py       # LLM-ready JSON output
+│   ├── __init__.py                # UPDATE: Exposes signal_generator & risk_filter
+│   ├── signal_generator.py        # EXIT_NOW / REDUCE / WATCH / HOLD
+│   ├── risk_filter.py             # Fear & Greed + OI filter
+│   └── output_formatter.py        # LLM-ready JSON output
 │
 ├── backtest/
-│   ├── __init__.py               # UPDATE: Meng-ekspos runner & metrics historis
-│   ├── events/                   # FTX, LUNA, 3AC historical event data
-│   ├── metrics.py                # Accuracy, early warning, false positive rate
-│   ├── runner.py                 # Run all backtest events
+│   ├── __init__.py                # UPDATE: Exposes runner & historical metrics
+│   ├── events/                    # FTX, LUNA, 3AC historical event data
+│   ├── metrics.py                 # Accuracy, early warning, false positive rate
+│   ├── runner.py                  # Run all backtest events
 │   └── results/
 │       └── summary_metrics.json
 │
 ├── demo/
-│   ├── demo.py                   # Interactive demo script
-│   ├── demo_crash.py             # Backtest demo for hackathon submission
-│   ├── visualizer.py             # Heatmap + timeline chart
-│   └── sample_output.json        # Example JSON output
+│   ├── demo.py                    # Interactive demo script
+│   ├── demo_crash.py              # Backtest demo for hackathon submission
+│   ├── visualizer.py              # Heatmap + timeline chart
+│   └── sample_output.json         # Example JSON output
 │
 ├── tests/
-│   ├── __init__.py               # UPDATE: File kosong (0 bytes) agar pytest mengenali modul tests
-│   ├── test_correlation.py       # Unit test untuk rolling correlation matrix
-│   ├── test_lag_detector.py      # Unit test untuk lag detector 0-48h
-│   ├── test_output_formatter.py  # Unit test untuk output JSON formatter
-│   ├── test_risk_filter.py       # Unit test untuk Fear & Greed + OI filter
-│   ├── test_sequencer.py         # Unit test untuk main pipeline sequencer
-│   └── test_signal_generator.py  # Unit test untuk penghasil sinyal (EXIT/REDUCE/WATCH)
+│   ├── __init__.py                # UPDATE: Empty file (0 bytes) so pytest recognizes tests module
+│   ├── test_correlation.py        # Unit test for rolling correlation matrix
+│   ├── test_lag_detector.py       # Unit test for lag detector 0-48h
+│   ├── test_output_formatter.py   # Unit test for output JSON formatter
+│   ├── test_risk_filter.py        # Unit test for Fear & Greed + OI filter
+│   ├── test_sequencer.py          # Unit test for main pipeline sequencer
+│   └── test_signal_generator.py   # Unit test for signal generator (EXIT/REDUCE/WATCH)
 │
-├── skill.json                    # Konfigurasi skill/metadata agent
-├── requirements.txt              # Dependensi pihak ketiga (pandas, numpy, requests, pytest, dll)
-└── .env.example                  # Contoh konfigurasi environment variable (API Keys)
+├── Makefile                       # All-in-one command runner
+├── skill.json                     # Skill/metadata agent configuration
+├── requirements.txt               # Third-party dependencies (pandas, numpy, requests, pytest, etc.)
+├── .env.example                   # Example environment variable configuration (API Keys)
+├── .gitignore                     # Ignore .DS_Store, .env, cache files, etc.
+├── test_data.py                   # Standalone script — sanity check data fetching/preprocessing
+└── test_stress.py                 # Standalone script — full English detailed stress-detection output
 ```
-
----
 
 ## Testing
 
@@ -327,6 +329,68 @@ Result: ✅ **109 passed, 0 failures, 0 errors**
 
 ---
 
+## 🚀 Quick Start with Makefile
+
+```bash
+# Clone the repository
+git clone https://github.com/ffffffffhugfadil/cross-asset-contagion-sequencer
+cd cross-asset-contagion-sequencer
+
+# Setup environment
+make setup
+
+# Run interactive demo
+make demo
+
+# Or run everything at once
+make all
+```
+
+### 📋 Available Make Commands
+
+| Command | Description |
+|---|---|
+| `make setup` | Setup virtual environment and install dependencies |
+| `make demo` | Run interactive demo |
+| `make backtest` | Run backtest demo (FTX, LUNA, 3AC) |
+| `make charts` | Generate all 13 visualization charts |
+| `make test` | Run all 109 unit tests |
+| `make images` | Open charts folder in Finder |
+| `make clean` | Clean cache files |
+| `make zip` | Create submission ZIP file |
+| `make export` | Export agent for CMC Agent Hub |
+| `make all` | Run tests + demo |
+| `make auto` | Full auto-demo for presentation |
+
+### 📊 Visualization Charts
+
+The skill generates 13 professional charts for presentations:
+
+| Event | Charts |
+|---|---|
+| FTX Collapse | Sequence, Impact, Timeline |
+| LUNA/UST Depeg | Sequence, Impact, Timeline |
+| 3AC/Celsius | Sequence, Impact, Timeline |
+| Sample | Sequence, Impact, Timeline, Combined |
+
+All charts are saved to `demo/images/` and ready for slide decks.
+
+### 🎬 Demo Video
+
+Watch the full demo walkthrough: [Demo Video](https://youtu.be/mpEFUg40DrI)
+
+### 📡 Live Data Note
+
+The skill fetches real-time data from Binance Public API (free, no API key required). If Binance API is temporarily unavailable, the skill gracefully falls back to backtest results and pre-generated charts.
+
+### 🔗 Links
+
+- **GitHub:** https://github.com/ffffffffhugfadil/cross-asset-contagion-sequencer
+- **Demo Video:** https://youtu.be/mpEFUg40DrI
+- **CMC Agent Hub:** Coming soon
+
+---
+
 ## Hackathon Submission
 
 **Event:** BNB Hack — AI Trading Agent Edition
@@ -339,6 +403,14 @@ Result: ✅ **109 passed, 0 failures, 0 errors**
 - **Real-world evidence** — 93.3% accuracy across $800B+ market cap loss events, zero false positives, 2.33h average early warning.
 - **Production ready** — Clean dataclasses, type hints, full error handling, unit tests.
 
+### Key Achievements
+
+✅ 93.3% accuracy across 3 major events
+✅ 2.33 hours early warning
+✅ 0% false positive rate
+✅ 109 unit tests passing
+✅ Production-ready code
+
 ---
 
 ## License
@@ -348,3 +420,5 @@ MIT — open for hackathon submission and future development.
 ---
 
 *Built for CMC Agent Hub Skills Marketplace · BNB Hack 2026*
+*Track: BNB Hack 2026 — Track 2: Strategy Skills*
+*Powered by: CoinMarketCap Agent Hub*
