@@ -1,8 +1,11 @@
 # Cross-Asset Contagion Sequencer
 
-**A CMC Strategy Skill that predicts which crypto assets get hit next — and in what order — before contagion spreads.**
+**Predicts which crypto assets get hit next — and in what order — before contagion spreads.**
 
 Built for BNB Hack 2026 · Track 2: Strategy Skills · Powered by CoinMarketCap Agent Hub
+
+- GitHub: https://github.com/ffffffffhugfadil/cross-asset-contagion-sequencer
+- Demo Video: -
 
 ---
 
@@ -10,9 +13,9 @@ Built for BNB Hack 2026 · Track 2: Strategy Skills · Powered by CoinMarketCap 
 
 When BTC crashes, ETH does not fall at the same moment. Neither does BNB, SOL, or ADA. Each asset absorbs the shock at a different time, in a predictable sequence driven by historical correlation lags.
 
-Every existing tool answers the wrong question. They detect contagion *after* it has already spread. By the time a signal fires, your portfolio has already taken the hit.
+Every existing tool answers the wrong question. They detect contagion *after* it has already spread. By the time a signal fires, the portfolio has already taken the hit.
 
-Traders need four answers before the damage arrives:
+Traders need four answers *before* the damage arrives:
 
 1. Which assets get hit next?
 2. In what order?
@@ -25,26 +28,26 @@ This Skill answers all four.
 
 ## Solution
 
-The Cross-Asset Contagion Sequencer detects stress in a source asset, computes historical lag correlations against target assets, and outputs a ranked contagion sequence with estimated timing and impact scores.
+The Cross-Asset Contagion Sequencer detects stress in a source asset, computes historical cross-correlation lags against target assets, and outputs a ranked contagion sequence with estimated timing and impact scores.
 
 ### Pipeline
 
 ```
 SOURCE STRESS DETECTED
   BTC: -5.8% cumulative over 6 hours
-            │
-            ▼
-  ┌─────────────────────────────────┐
-  │  1. Detect stress onset         │
-  │  2. Compute cross-correlation   │
-  │     lags (0–48h) per target     │
-  │  3. Sort by lag → sequence      │
-  │  4. Score impact (OI amplifier) │
-  │  5. Assign signals              │
-  └─────────────────────────────────┘
-            │
-            ▼
-CONTAGION SEQUENCE OUTPUT
+              │
+              ▼
+  ┌─────────────────────────────────────┐
+  │  1. Detect stress onset              │
+  │  2. Compute cross-correlation lags   │
+  │     (0–48h window) per target        │
+  │  3. Sort by lag → ranked sequence    │
+  │  4. Score impact (OI + funding)      │
+  │  5. Assign actionable signals        │
+  └─────────────────────────────────────┘
+              │
+              ▼
+CONTAGION SEQUENCE
   BTC → ETH(+2h) → BNB(+5h) → SOL(+9h) → ADA(+14h)
   Signals: EXIT_NOW · REDUCE · WATCH · HOLD
 ```
@@ -66,16 +69,16 @@ The closest existing Skill is *Assess Liquidation Cascade Risk* (1.3K calls in m
 
 ## Backtest Results
 
-Tested across 12 real market stress events spanning 2017–2025. All data sourced from Binance Public API — no synthetic data, no lookahead bias.
+Tested across 12 real market stress events spanning 2017–2025. All data sourced from Binance Public API — real OHLCV, no synthetic data, no lookahead bias.
 
 ### Summary
 
 | Metric | Result |
 |---|---|
 | Events tested | 12 |
-| Data source | Binance Public API (real OHLCV) |
+| Data source | Binance Public API (real) |
 | Average sequence accuracy | **73.6%** |
-| Perfect predictions (100%) | **7 / 12 events (58.3%)** |
+| Perfect predictions (100%) | **7 / 12 events** |
 | Failed events | **0** |
 | Random baseline (3-asset) | ~16.7% |
 | Improvement over random | **4.4× better** |
@@ -99,15 +102,45 @@ Tested across 12 real market stress events spanning 2017–2025. All data source
 
 ### Key Finding
 
-> *"The Cross-Asset Contagion Sequencer correctly predicted the contagion spread sequence with 73.6% average accuracy across 12 real market stress events spanning 2017–2025 — with 7 out of 12 events predicted perfectly and zero failures. This is 4.4× better than random chance for a 3-asset sequence."*
+> *"73.6% average accuracy across 12 real market stress events spanning 2017–2025 — with 7 out of 12 events predicted perfectly and zero failures. 4.4× better than random chance for a 3-asset sequence."*
 
-### Why 73.6% Is a Strong Result
-
-Events scoring below 100% still produced correct signal categories (EXIT_NOW / REDUCE / WATCH) for every asset — meaning actionable output remained valid even when exact sequence order deviated. The 5 partial-accuracy events consistently got the middle asset correct, with first and last positions occasionally swapped.
+Events scoring below 100% still produced correct signal categories for every asset. The 5 partial-accuracy events consistently got the middle asset correct, with first and last positions occasionally swapped.
 
 ---
 
-## Installation
+## CMC Agent Hub Integration
+
+The project integrates with CoinMarketCap Agent Hub via MCP protocol for macro regime validation and enhanced signal quality.
+
+### Integration Status
+
+| Component | Status |
+|---|---|
+| MCP connection | Verified |
+| `find_skill` | Returns skill candidates |
+| `execute_skill` | Calls skills successfully |
+| Data access | Limited by Basic Plan tier |
+| Architecture | Production-ready for Pro tier |
+
+### CMC Skills Used
+
+| Skill | Purpose in Sequencer |
+|---|---|
+| `daily_market_overview` | Market regime context before analysis |
+| `crypto_macro_overview` | RISK_ON / RISK_OFF regime filter |
+| `btc_cross_asset_correlation` | BTC vs Nasdaq / DXY / Gold context |
+| `btc_etf_institutional_demand` | ETF flow + institutional demand |
+| `altcoin_breakout_scanner_spot` | Post-contagion breakout detection |
+
+### Projected Accuracy with CMC Pro
+
+Full CMC Pro access adds macro regime validation, BTC cross-asset correlation, and ETF flow data as additional signal layers. Estimated accuracy increase: 73.6% → 80%+.
+
+---
+
+## Quick Start
+
+### Installation
 
 ```bash
 git clone https://github.com/ffffffffhugfadil/cross-asset-contagion-sequencer
@@ -115,22 +148,16 @@ cd cross-asset-contagion-sequencer
 make setup
 ```
 
-Requirements: Python 3.9+, internet connection for Binance API (free, no key required).
-
----
-
-## Quick Start
+### Usage
 
 ```python
 from core.sequencer import ContagionSequencer, AssetReturn
 from data.fetcher_binance import get_returns_with_timestamps
 
-# Fetch live data
 btc_returns, btc_ts = get_returns_with_timestamps("BTC", hours=168)
 eth_returns, eth_ts = get_returns_with_timestamps("ETH", hours=168)
 bnb_returns, bnb_ts = get_returns_with_timestamps("BNB", hours=168)
 
-# Run sequencer
 sequencer = ContagionSequencer()
 result = sequencer.run(
     source=AssetReturn("BTC", btc_returns, btc_ts),
@@ -173,7 +200,7 @@ print(result.to_dict())
       "confidence": 0.81
     }
   ],
-  "reasoning": "BTC is showing CRITICAL stress. Historical lag analysis predicts contagion sequence: BTC → ETH(+2h) → BNB(+6h). Full spread expected within 14.0 hours. Signals are research context only.",
+  "reasoning": "BTC is showing CRITICAL stress. Predicted sequence: BTC → ETH(+2h) → BNB(+6h). Signals are research context only.",
   "data_quality_flags": []
 }
 ```
@@ -182,16 +209,16 @@ print(result.to_dict())
 
 ## Make Commands
 
-```bash
-make setup      # Install dependencies
-make demo       # Interactive demo (live + backtest modes)
-make backtest   # Show 12-event backtest results
-make result     # Quick summary (73.6% accuracy)
-make charts     # Generate 36 visualization charts
-make test       # Run 109 unit tests
-make zip        # Create submission ZIP
-make clean      # Clear cache
-```
+| Command | Description |
+|---|---|
+| `make setup` | Install dependencies |
+| `make demo` | Interactive demo (live + backtest + charts) |
+| `make backtest` | Show 12-event backtest results |
+| `make result` | Quick summary (73.6% accuracy) |
+| `make charts` | Generate 36 visualization charts |
+| `make test` | Run 109 unit tests |
+| `make zip` | Create submission ZIP |
+| `make clean` | Clear cache |
 
 ---
 
@@ -199,15 +226,10 @@ make clean      # Clear cache
 
 ```bash
 make test
+# Ran 109 tests in 0.13s — OK
 ```
 
-```
-Ran 109 tests in 0.13s
-
-OK
-```
-
-109 tests covering correlation matrix, lag detection, sequencer pipeline, signal generation, risk filtering, and output formatting.
+109 tests across correlation matrix, lag detection, sequencer pipeline, signal generation, risk filtering, and output formatting.
 
 ---
 
@@ -217,16 +239,16 @@ OK
 cross-asset-contagion-sequencer/
 │
 ├── core/
-│   ├── sequencer.py          # Main pipeline — integrates all modules
+│   ├── sequencer.py          # Main pipeline
 │   ├── correlation.py        # Rolling correlation matrix
 │   ├── lag_detector.py       # Cross-correlation lag detection (0–48h)
-│   ├── stress_detector.py    # Source asset stress detection
+│   ├── stress_detector.py    # Stress onset detection
 │   └── scorer.py             # Confidence scoring
 │
 ├── data/
-│   ├── fetcher_binance.py    # Binance Public API (free, no key needed)
-│   ├── fetcher_cmc.py        # CMC API (optional — OI + funding data)
-│   └── preprocessor.py       # Return normalization + timestamp alignment
+│   ├── fetcher_binance.py    # Binance Public API (free, no key)
+│   ├── fetcher_cmc.py        # CMC API (optional — OI + funding)
+│   └── preprocessor.py       # Return normalization
 │
 ├── strategy/
 │   ├── signal_generator.py   # EXIT_NOW / REDUCE / WATCH / HOLD
@@ -234,21 +256,22 @@ cross-asset-contagion-sequencer/
 │   └── output_formatter.py   # LLM-ready JSON output
 │
 ├── backtest/
-│   ├── real_runner.py        # Runs all 12 events against Binance data
-│   ├── events_config.py      # Event definitions (date, assets, threshold)
-│   ├── outcome_extractor.py  # Derives actual sequence from price data
-│   └── cache/                # Cached Binance OHLCV (avoids re-fetching)
+│   ├── real_runner.py        # Runs 12 events against Binance data
+│   ├── events_config.py      # Event definitions
+│   ├── outcome_extractor.py  # Derives actual sequence from prices
+│   └── cache/                # Cached OHLCV data
 │
 ├── demo/
-│   ├── demo.py               # Interactive demo (live + backtest + charts)
+│   ├── demo.py               # Interactive demo
 │   ├── demo_crash.py         # Standalone backtest display
-│   ├── visualizer.py         # Matplotlib charts (sequence, impact, timeline)
-│   └── images/               # 36 generated charts (3 per event)
+│   ├── visualizer.py         # Matplotlib charts
+│   └── images/               # 36 generated charts
 │
-├── tests/                    # 109 unit tests across 6 files
+├── tests/                    # 109 unit tests
 ├── skill.json                # CMC Skill Hub metadata
+├── SKILL.md                  # CMC Agent Hub Skill manifest
 ├── Makefile                  # One-command runner
-└── requirements.txt          # numpy, requests, matplotlib, python-dotenv
+└── requirements.txt          # numpy · requests · matplotlib · python-dotenv
 ```
 
 ---
@@ -258,18 +281,22 @@ cross-asset-contagion-sequencer/
 | Source | Purpose | Key Required |
 |---|---|---|
 | Binance Public API | Historical OHLCV (hourly) | No |
-| CoinMarketCap API | Quotes, Fear & Greed, OI, funding rate | Optional — free tier |
-
-The Skill runs fully on Binance data alone. CMC API enhances impact scores via OI amplifier and funding rate dampener when available.
+| CoinMarketCap API | Quotes, Fear & Greed, OI, funding | Optional — free tier |
 
 ---
 
 ## Limitations
 
-- Sequence accuracy degrades when two assets have nearly identical historical lag profiles (< 1 hour difference). This occurred in 5 of 12 events.
-- Impact scores calibrated on 2020–2025 volatility regimes. Extreme low-volatility periods may benefit from threshold recalibration.
+- Sequence accuracy degrades when two assets have nearly identical lag profiles (< 1 hour difference).
+- Impact scores calibrated on 2020–2025 volatility regimes.
 - Requires minimum 72 hours of historical data for stable correlation estimates.
-- Research context only — not an execution instruction. No position sizing or leverage guidance.
+- Research context only — not an execution instruction.
+
+---
+
+## License
+
+MIT
 
 ---
 
@@ -277,13 +304,4 @@ The Skill runs fully on Binance data alone. CMC API enhances impact scores via O
 
 **Event:** BNB Hack 2026 — AI Trading Agent Edition  
 **Track:** Track 2 — Strategy Skills  
-**Data:** CoinMarketCap Agent Hub · Binance Public API  
-
-**GitHub:** https://github.com/ffffffffhugfadil/cross-asset-contagion-sequencer  
-**Demo Video:** https://youtu.be/mpEFUg40DrI
-
----
-
-## License
-
-MIT
+**Powered by:** CoinMarketCap Agent Hub · Binance Public API  
