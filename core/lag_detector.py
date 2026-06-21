@@ -158,3 +158,34 @@ def find_optimal_lag_windowed(
         return 0, 0.0
     
     return best_lag, best_corr
+
+
+def detect_lag_pattern(
+    source_returns: list[float],
+    target_returns_list: list[tuple[str, list[float]]],
+    max_lag: int = 48,
+) -> list[tuple[str, int, float, float]]:
+    """
+    Detect lag patterns for multiple targets against a single source.
+    
+    Args:
+        source_returns: Source asset returns
+        target_returns_list: List of (symbol, returns) tuples
+        max_lag: Maximum lag to consider
+    
+    Returns:
+        List of (symbol, lag_hours, correlation, confidence) sorted by lag
+    """
+    results = []
+    
+    for symbol, tgt_returns in target_returns_list:
+        lag, corr = find_optimal_lag(source_returns, tgt_returns, max_lag)
+        conf = lag_confidence(source_returns, tgt_returns, lag, max_lag)
+        
+        if corr > 0.1:  # Only include meaningful correlations
+            results.append((symbol, lag, corr, conf))
+    
+    # Sort by lag (assets that react first come first)
+    results.sort(key=lambda x: x[1])
+    
+    return results

@@ -32,6 +32,18 @@ from core.lag_detector import find_optimal_lag_windowed, lag_confidence
 from core.correlation import correlation_matrix
 from core.scorer import calculate_confidence_score, confidence_level
 
+# ===== CMC INTEGRATION =====
+try:
+    from data.fetcher_cmc import (
+        get_macro_regime,
+        get_btc_correlation,
+        get_btc_etf_demand,
+        get_altcoin_breakouts,
+    )
+    CMC_AVAILABLE = True
+except ImportError:
+    CMC_AVAILABLE = False
+
 
 # ---------------------------------------------------------------------------
 # Data Structures
@@ -158,6 +170,28 @@ def _build_reasoning(
     )
 
 
+# ===== CMC VALIDATION FUNCTION =====
+def _get_cmc_context() -> dict:
+    """Fetch CMC macro context for validation."""
+    if not CMC_AVAILABLE:
+        return {"available": False}
+    
+    try:
+        macro = get_macro_regime()
+        corr = get_btc_correlation()
+        etf = get_btc_etf_demand()        # ← TAMBAH
+        breakouts = get_altcoin_breakouts()  # ← TAMBAH
+        return {
+            "available": True,
+            "macro": macro,
+            "correlation": corr,
+            "etf": etf,
+            "breakouts": breakouts,
+        }
+    except Exception as e:
+        return {"available": False, "error": str(e)}
+
+
 # ---------------------------------------------------------------------------
 # Main Sequencer
 # ---------------------------------------------------------------------------
@@ -175,6 +209,7 @@ class ContagionSequencer:
     ) -> SequencerOutput:
 
         data_flags: list[str] = []
+        cmc_context = {}
 
         # ------------------------------------------------------------------
         # Step 1: Detect stress + get onset_idx
@@ -196,6 +231,51 @@ class ContagionSequencer:
                 reasoning=_build_reasoning(source.symbol, "NONE", [], 0.0, []),
                 data_quality_flags=[],
             )
+
+        # ------------------------------------------------------------------
+        # Step 1b: CMC Validation (enhance confidence)
+        # ------------------------------------------------------------------
+        if CMC_AVAILABLE:
+            cmc_context = _get_cmc_context()
+            if cmc_context.get("available"):
+                macro = cmc_context.get("macro", {})
+                corr = cmc_context.get("correlation", {})
+                etf = cmc_context.get("etf", {})
+                breakouts = cmc_context.get("breakouts", {})
+                
+                # 1. Macro Regime
+                if macro and macro.get('regime') == 'RISK_OFF':
+                    confidence_boost = 0.9
+                    data_flags.append("CMC: Risk-off regime confirmed")
+                elif macro and macro.get('regime') == 'RISK_ON':
+                    confidence_boost = 1.0
+                    data_flags.append("CMC: Risk-on regime confirmed")
+                else:
+                    confidence_boost = 0.95
+                
+                # 2. BTC Correlation (DXY)
+                dxy = corr.get('btc_vs_dxy', 0) if corr else 0
+                if dxy is not None and dxy < -0.4:
+                    severity = "HIGH"
+                    data_flags.append(f"CMC: DXY divergence detected ({dxy:.2f})")
+                
+                # 3. ETF Flow
+                if etf:
+                    outflow = etf.get('etf_flow', {}).get('outflow', 0)
+                    if outflow > 100_000_000:
+                        confidence_boost *= 0.85
+                        data_flags.append(f"CMC: Large ETF outflow detected (${outflow:,.0f})")
+                
+                # 4. Altcoin Breakouts
+                if breakouts:
+                    breakout_count = len(breakouts.get('breakout_queue', []))
+                    if breakout_count > 5:
+                        market_regime = "RISK_ON"
+                        data_flags.append(f"CMC: {breakout_count} altcoin breakouts detected")
+                
+                # Store CMC context for output
+                cmc_context["applied"] = True
+                cmc_context["confidence_boost"] = confidence_boost
 
         # ------------------------------------------------------------------
         # Step 2: Validate targets

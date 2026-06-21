@@ -9,7 +9,7 @@ that is easy for AI agents to parse and act upon.
 
 import json
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def format_for_llm(
@@ -22,6 +22,7 @@ def format_for_llm(
     reasoning: str,
     data_quality_flags: List[str],
     additional_context: Optional[Dict] = None,
+    cmc_context: Optional[Dict] = None,  # ← TAMBAH
 ) -> Dict:
     """
     Format sequencer output for LLM consumption.
@@ -30,6 +31,7 @@ def format_for_llm(
     - Summary for quick decision making
     - Detailed sequence for analysis
     - Reasoning for transparency
+    - CMC macro context (optional)
     """
     # Build summary
     if contagion_detected:
@@ -53,7 +55,7 @@ def format_for_llm(
         })
     
     output = {
-        'timestamp': datetime.utcnow().isoformat() + 'Z',
+        'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
         'summary': summary,
         'contagion_detected': contagion_detected,
         'source_asset': source_asset,
@@ -79,6 +81,21 @@ def format_for_llm(
     
     if additional_context:
         output['context'] = additional_context
+    
+    # ===== CMC CONTEXT =====
+    if cmc_context and cmc_context.get('available'):
+        output['cmc_context'] = {
+            'macro_regime': cmc_context.get('macro', {}).get('regime', 'UNKNOWN'),
+            'confidence': cmc_context.get('macro', {}).get('confidence', 'LOW'),
+            'correlation': {
+                'btc_vs_nasdaq': cmc_context.get('correlation', {}).get('btc_vs_nasdaq'),
+                'btc_vs_dxy': cmc_context.get('correlation', {}).get('btc_vs_dxy'),
+                'btc_vs_gold': cmc_context.get('correlation', {}).get('btc_vs_gold'),
+            },
+            'etf_outflow': cmc_context.get('etf', {}).get('etf_flow', {}).get('outflow'),
+            'altcoin_breakouts': len(cmc_context.get('breakouts', {}).get('breakout_queue', [])),
+            'applied': cmc_context.get('applied', False),
+        }
     
     return output
 
@@ -114,6 +131,17 @@ def format_as_markdown(output: Dict) -> str:
         lines.append(f"✅ **No Contagion Detected** from {output['source_asset']}")
         lines.append(f"\n{output.get('summary', 'Market appears stable.')}")
     
+    # ===== CMC CONTEXT (Markdown) =====
+    cmc = output.get('cmc_context')
+    if cmc and cmc.get('applied'):
+        lines.append("\n### CMC Macro Context\n")
+        lines.append(f"- **Macro Regime**: {cmc.get('macro_regime', 'UNKNOWN')}")
+        lines.append(f"- **Regime Confidence**: {cmc.get('confidence', 'LOW')}")
+        if cmc.get('correlation'):
+            lines.append(f"- **BTC vs Nasdaq**: {cmc['correlation'].get('btc_vs_nasdaq', 'N/A')}")
+            lines.append(f"- **BTC vs DXY**: {cmc['correlation'].get('btc_vs_dxy', 'N/A')}")
+        lines.append(f"- **Altcoin Breakouts**: {cmc.get('altcoin_breakouts', 0)}")
+    
     if output.get('data_quality_flags'):
         lines.append("\n### Data Quality Notes\n")
         for flag in output['data_quality_flags']:
@@ -142,7 +170,7 @@ def compress_for_agent(output: Dict) -> Dict:
     
     Removes verbose fields, keeps only essentials for decision making.
     """
-    return {
+    compressed = {
         'detected': output.get('contagion_detected', False),
         'source': output.get('source_asset'),
         'severity': output.get('stress_severity'),
@@ -153,3 +181,11 @@ def compress_for_agent(output: Dict) -> Dict:
         ],
         'reasoning_short': output.get('reasoning', '')[:200],
     }
+    
+    # Tambahkan CMC context ke compressed
+    cmc = output.get('cmc_context')
+    if cmc and cmc.get('applied'):
+        compressed['cmc_regime'] = cmc.get('macro_regime')
+        compressed['cmc_confidence'] = cmc.get('confidence')
+    
+    return compressed
