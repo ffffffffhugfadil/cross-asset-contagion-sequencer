@@ -5,7 +5,7 @@
 Built for BNB Hack 2026 · Track 2: Strategy Skills · Powered by CoinMarketCap Agent Hub
 
 - GitHub: https://github.com/ffffffffhugfadil/cross-asset-contagion-sequencer
-- Demo Video: -
+- Demo Video: https://youtu.be/G7J_986qhj4?si=bY-G8Gb5RICM0Kfg
 
 ---
 
