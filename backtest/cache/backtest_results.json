@@ -1,0 +1,233 @@
+{
+  "total_events": 12,
+  "successful": 12,
+  "failed": 0,
+  "failed_names": [],
+  "avg_accuracy": 0.7361111111111112,
+  "results": {
+    "FTX Collapse": {
+      "event": "FTX Collapse",
+      "date": "2022-11-08",
+      "category": "exchange_insolvency",
+      "predicted_sequence": [
+        "ETH",
+        "BNB",
+        "SOL"
+      ],
+      "actual_sequence": [
+        "SOL",
+        "BNB",
+        "ETH"
+      ],
+      "sequence_accuracy": 0.3333333333333333,
+      "overall_confidence": "HIGH",
+      "stress_severity": "MEDIUM",
+      "data_quality_flags": []
+    },
+    "LUNA/UST Depeg": {
+      "event": "LUNA/UST Depeg",
+      "date": "2022-05-09",
+      "category": "stablecoin_depeg",
+      "predicted_sequence": [
+        "BTC",
+        "ETH",
+        "SOL",
+        "BNB"
+      ],
+      "actual_sequence": [
+        "BTC",
+        "SOL",
+        "ETH",
+        "BNB"
+      ],
+      "sequence_accuracy": 0.5,
+      "overall_confidence": "HIGH",
+      "stress_severity": "HIGH",
+      "data_quality_flags": []
+    },
+    "3AC/Celsius Contagion": {
+      "event": "3AC/Celsius Contagion",
+      "date": "2022-06-13",
+      "category": "lender_contagion",
+      "predicted_sequence": [
+        "ETH",
+        "SOL",
+        "BNB"
+      ],
+      "actual_sequence": [
+        "ETH",
+        "SOL",
+        "BNB"
+      ],
+      "sequence_accuracy": 1.0,
+      "overall_confidence": "HIGH",
+      "stress_severity": "MEDIUM",
+      "data_quality_flags": []
+    },
+    "USDC Depeg / SVB": {
+      "event": "USDC Depeg / SVB",
+      "date": "2023-03-10",
+      "category": "bank_run_depeg",
+      "predicted_sequence": [
+        "ETH",
+        "SOL",
+        "BNB"
+      ],
+      "actual_sequence": [
+        "ETH",
+        "SOL",
+        "BNB"
+      ],
+      "sequence_accuracy": 1.0,
+      "overall_confidence": "HIGH",
+      "stress_severity": "MEDIUM",
+      "data_quality_flags": []
+    },
+    "COVID Black Thursday": {
+      "event": "COVID Black Thursday",
+      "date": "2020-03-12",
+      "category": "leverage_cascade",
+      "predicted_sequence": [
+        "BNB",
+        "SOL",
+        "ETH"
+      ],
+      "actual_sequence": [
+        "BNB",
+        "SOL",
+        "ETH"
+      ],
+      "sequence_accuracy": 1.0,
+      "overall_confidence": "HIGH",
+      "stress_severity": "HIGH",
+      "data_quality_flags": []
+    },
+    "SEC vs Binance/Coinbase": {
+      "event": "SEC vs Binance/Coinbase",
+      "date": "2023-06-05",
+      "category": "regulatory_fud",
+      "predicted_sequence": [
+        "ETH",
+        "SOL",
+        "BNB"
+      ],
+      "actual_sequence": [
+        "BNB",
+        "SOL",
+        "ETH"
+      ],
+      "sequence_accuracy": 0.3333333333333333,
+      "overall_confidence": "HIGH",
+      "stress_severity": "MEDIUM",
+      "data_quality_flags": []
+    },
+    "Ronin Bridge Hack": {
+      "event": "Ronin Bridge Hack",
+      "date": "2022-03-23",
+      "category": "bridge_exploit",
+      "predicted_sequence": [
+        "SOL",
+        "ETH",
+        "BNB"
+      ],
+      "actual_sequence": [
+        "SOL",
+        "ETH",
+        "BNB"
+      ],
+      "sequence_accuracy": 1.0,
+      "overall_confidence": "HIGH",
+      "stress_severity": "MEDIUM",
+      "data_quality_flags": []
+    },
+    "China Mining Ban + May 2021 Crash": {
+      "event": "China Mining Ban + May 2021 Crash",
+      "date": "2021-05-19",
+      "category": "regulatory_shock",
+      "predicted_sequence": [
+        "ETH",
+        "BNB",
+        "SOL"
+      ],
+      "actual_sequence": [
+        "SOL",
+        "BNB",
+        "ETH"
+      ],
+      "sequence_accuracy": 0.3333333333333333,
+      "overall_confidence": "HIGH",
+      "stress_severity": "MEDIUM",
+      "data_quality_flags": []
+    },
+    "China ICO Ban": {
+      "event": "China ICO Ban",
+      "date": "2017-09-04",
+      "category": "regulatory_ban",
+      "predicted_sequence": [
+        "ETH",
+        "BNB"
+      ],
+      "actual_sequence": [
+        "ETH",
+        "BNB"
+      ],
+      "sequence_accuracy": 1.0,
+      "overall_confidence": "HIGH",
+      "stress_severity": "HIGH",
+      "data_quality_flags": []
+    },
+    "Poly Network Hack": {
+      "event": "Poly Network Hack",
+      "date": "2021-08-10",
+      "category": "bridge_exploit",
+      "predicted_sequence": [
+        "BTC",
+        "SOL",
+        "BNB"
+      ],
+      "actual_sequence": [
+        "BTC",
+        "SOL",
+        "BNB"
+      ],
+      "sequence_accuracy": 1.0,
+      "overall_confidence": "HIGH",
+      "stress_severity": "MEDIUM",
+      "data_quality_flags": []
+    },
+    "Euler Finance Hack": {
+      "event": "Euler Finance Hack",
+      "date": "2023-03-13",
+      "category": "defi_exploit",
+      "predicted_sequence": [
+        "ETH",
+        "AAVE",
+        "COMP"
+      ],
+      "actual_sequence": [
+        "COMP",
+        "AAVE",
+        "ETH"
+      ],
+      "sequence_accuracy": 0.3333333333333333,
+      "overall_confidence": "HIGH",
+      "stress_severity": "MEDIUM",
+      "data_quality_flags": []
+    },
+    "Bybit Hack": {
+      "event": "Bybit Hack",
+      "date": "2025-02-21",
+      "category": "custody_hack",
+      "predicted_sequence": [
+        "BTC"
+      ],
+      "actual_sequence": [
+        "BTC"
+      ],
+      "sequence_accuracy": 1.0,
+      "overall_confidence": "HIGH",
+      "stress_severity": "HIGH",
+      "data_quality_flags": []
+    }
+  }
+}

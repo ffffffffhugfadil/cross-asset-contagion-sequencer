@@ -1,0 +1,83 @@
+{
+  "total_events": 3,
+  "successful": 3,
+  "failed": 0,
+  "failed_names": [],
+  "avg_accuracy": 1.0,
+  "results": {
+    "FTX Collapse": {
+      "event": "FTX Collapse",
+      "date": "2022-11-08",
+      "category": "exchange_insolvency",
+      "predicted_sequence": [
+        "ETH",
+        "BNB",
+        "CAKE",
+        "LINK",
+        "ADA"
+      ],
+      "actual_sequence": [
+        "ETH",
+        "BNB",
+        "CAKE",
+        "LINK",
+        "ADA"
+      ],
+      "sequence_accuracy": 1.0,
+      "overall_confidence": "HIGH",
+      "stress_severity": "HIGH",
+      "data_quality_flags": [],
+      "data_source": "synthetic_data"
+    },
+    "LUNA/UST Depeg": {
+      "event": "LUNA/UST Depeg",
+      "date": "2022-05-09",
+      "category": "stablecoin_depeg",
+      "predicted_sequence": [
+        "ETH",
+        "BNB",
+        "CAKE",
+        "LINK",
+        "ADA"
+      ],
+      "actual_sequence": [
+        "ETH",
+        "BNB",
+        "CAKE",
+        "LINK",
+        "ADA"
+      ],
+      "sequence_accuracy": 1.0,
+      "overall_confidence": "HIGH",
+      "stress_severity": "HIGH",
+      "data_quality_flags": [],
+      "data_source": "synthetic_data"
+    },
+    "3AC/Celsius Contagion": {
+      "event": "3AC/Celsius Contagion",
+      "date": "2022-06-13",
+      "category": "lender_contagion",
+      "predicted_sequence": [
+        "ETH",
+        "BNB",
+        "CAKE",
+        "LINK",
+        "ADA"
+      ],
+      "actual_sequence": [
+        "ETH",
+        "BNB",
+        "CAKE",
+        "LINK",
+        "ADA"
+      ],
+      "sequence_accuracy": 1.0,
+      "overall_confidence": "HIGH",
+      "stress_severity": "HIGH",
+      "data_quality_flags": [],
+      "data_source": "synthetic_data"
+    }
+  },
+  "data_source": "synthetic_data (NOT real market data)",
+  "note": "This is synthetic data for pipeline testing only"
+}

@@ -1,4 +1,3 @@
-cat > demo/sample_output.json << 'EOF'
 {
   "contagion_detected": true,
   "source_asset": "BTC",
@@ -54,7 +53,6 @@ cat > demo/sample_output.json << 'EOF'
     }
   ],
   "summary": "BTC stress detected (CRITICAL). Contagion predicted across 5 assets over 18.0 hours. Confidence: HIGH.",
-  "reasoning": "BTC is showing CRITICAL stress with -5.8% cumulative drop over 6 hours. Historical lag analysis predicts contagion spread: BTC -> ETH(+2h) -> BNB(+5h) -> CAKE(+9h) -> LINK(+14h) -> ADA(+18h).",
+  "reasoning": "BTC is showing CRITICAL stress with -5.8% cumulative drop over 6 hours. Historical lag analysis predicts contagion spread: BTC -> ETH(+2h) -> BNB(+5h) -> CAKE(+9h) -> LINK(+14h) -> ADA(+18h). Signals are research context only.",
   "data_quality_flags": []
 }
-EOF

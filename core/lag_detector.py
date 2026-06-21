@@ -2,12 +2,9 @@
 core/lag_detector.py
 ====================
 Cross-correlation lag detection between source and target assets.
-
-Identifies the optimal lag (in hours) where target best correlates
-with source, enabling prediction of contagion spread timing.
 """
 
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 import numpy as np
 
 
@@ -15,21 +12,8 @@ def cross_correlation(
     source_returns: List[float],
     target_returns: List[float],
     max_lag: int = 48,
-    normalize: bool = True,
 ) -> List[float]:
-    """
-    Compute cross-correlation between source and target at various lags.
-    
-    Args:
-        source_returns: Source asset returns (oldest first)
-        target_returns: Target asset returns (oldest first)
-        max_lag: Maximum lag to consider (hours)
-        normalize: If True, return correlation coefficients
-    
-    Returns:
-        List of correlation values for lags 0 to max_lag
-        Positive lag means target lags behind source
-    """
+    """Compute cross-correlation between source and target at various lags."""
     if len(source_returns) < max_lag + 1 or len(target_returns) < max_lag + 1:
         return [0.0] * (max_lag + 1)
     
@@ -37,16 +21,11 @@ def cross_correlation(
     tgt = np.array(target_returns, dtype=float)
     
     correlations = []
-    
     for lag in range(max_lag + 1):
         if lag == 0:
-            # No shift
             src_aligned = src
             tgt_aligned = tgt
         else:
-            # Shift: source lags behind target? Wait, careful.
-            # We want: if target lags source by lag hours,
-            # then target[lag:] correlates with source[:-lag]
             if len(src) <= lag or len(tgt) <= lag:
                 correlations.append(0.0)
                 continue
@@ -68,7 +47,7 @@ def cross_correlation(
             correlations.append(0.0)
         else:
             corr = np.corrcoef(src_aligned, tgt_aligned)[0, 1]
-            correlations.append(float(corr) if normalize else float(corr * std_src * std_tgt))
+            correlations.append(float(corr))
     
     return correlations
 
@@ -79,19 +58,7 @@ def find_optimal_lag(
     max_lag: int = 48,
     min_correlation: float = 0.1,
 ) -> Tuple[int, float]:
-    """
-    Find the lag that maximizes correlation between source and target.
-    
-    Args:
-        source_returns: Source asset returns
-        target_returns: Target asset returns
-        max_lag: Maximum lag to search (hours)
-        min_correlation: Minimum correlation to consider valid
-    
-    Returns:
-        Tuple of (optimal_lag_hours, correlation_at_lag)
-        Returns (0, 0.0) if no significant correlation found
-    """
+    """Find lag that maximizes correlation."""
     correlations = cross_correlation(source_returns, target_returns, max_lag)
     
     best_lag = 0
@@ -114,16 +81,7 @@ def lag_confidence(
     optimal_lag: int,
     max_lag: int = 48,
 ) -> float:
-    """
-    Calculate confidence in the detected lag.
-    
-    Higher confidence when:
-    - Optimal lag is significantly better than lag 0
-    - Correlation peak is sharp (not flat)
-    
-    Returns:
-        Confidence score between 0.0 and 1.0
-    """
+    """Calculate confidence in detected lag."""
     correlations = cross_correlation(source_returns, target_returns, max_lag)
     
     if not correlations:
@@ -132,10 +90,8 @@ def lag_confidence(
     r_at_zero = correlations[0] if len(correlations) > 0 else 0.0
     r_at_lag = correlations[optimal_lag] if optimal_lag < len(correlations) else 0.0
     
-    # Improvement over zero lag
     improvement = r_at_lag - abs(r_at_zero)
     
-    # Sharpness: difference between peak and neighbors
     sharpness = 0.0
     if optimal_lag > 0 and optimal_lag < len(correlations) - 1:
         left = correlations[optimal_lag - 1]
@@ -143,36 +99,62 @@ def lag_confidence(
         sharpness = r_at_lag - max(left, right)
     
     confidence = min(1.0, max(0.0, improvement * 2 + sharpness + abs(r_at_lag)))
-    
     return confidence
 
 
-def detect_lag_pattern(
-    source_returns: List[float],
-    target_returns_list: List[Tuple[str, List[float]]],
+def find_optimal_lag_windowed(
+    source_returns: list[float],
+    target_returns: list[float],
+    onset_idx: int,
+    window_before: int = 24,
+    window_after: int = 72,
     max_lag: int = 48,
-) -> List[Tuple[str, int, float, float]]:
+    min_correlation: float = 0.05,
+    min_improvement: float = 0.02,  # ← FIX: minimal improvement over lag 0
+) -> tuple[int, float]:
     """
-    Detect lag patterns for multiple targets against a single source.
+    Find optimal lag focusing on crash window around onset.
+    Prevents bulk-data noise from drowning the stress signal.
     
-    Args:
-        source_returns: Source asset returns
-        target_returns_list: List of (symbol, returns) tuples
-        max_lag: Maximum lag to consider
-    
-    Returns:
-        List of (symbol, lag_hours, correlation, confidence) sorted by lag
+    FIX: Hanya pilih lag yang memiliki improvement > min_improvement
+    dibanding correlation di lag 0.
     """
-    results = []
+    total = len(source_returns)
+    w_start = max(0, onset_idx - window_before)
+    w_end = min(total, onset_idx + window_after)
     
-    for symbol, tgt_returns in target_returns_list:
-        lag, corr = find_optimal_lag(source_returns, tgt_returns, max_lag)
-        conf = lag_confidence(source_returns, tgt_returns, lag, max_lag)
-        
-        if corr > 0.1:  # Only include meaningful correlations
-            results.append((symbol, lag, corr, conf))
+    # Pastikan window cukup besar
+    if w_end - w_start < 20:
+        w_start = max(0, onset_idx - 48)
+        w_end = min(total, onset_idx + 48)
     
-    # Sort by lag (assets that react first come first)
-    results.sort(key=lambda x: x[1])
+    src_win = source_returns[w_start:w_end]
+    tgt_win = target_returns[w_start:w_end]
     
-    return results
+    if len(src_win) < 10:
+        return 0, 0.0
+    
+    # Hitung korelasi untuk semua lag
+    corrs = cross_correlation(src_win, tgt_win, max_lag)
+    
+    if not corrs:
+        return 0, 0.0
+    
+    r_at_zero = corrs[0] if len(corrs) > 0 else 0.0
+    
+    # Cari lag dengan korelasi tertinggi DAN improvement > min_improvement
+    best_lag = 0
+    best_corr = r_at_zero
+    
+    for lag, corr in enumerate(corrs):
+        # FIX: Hanya pilih jika improvement signifikan
+        improvement = corr - r_at_zero
+        if corr > best_corr and improvement > min_improvement:
+            best_corr = corr
+            best_lag = lag
+    
+    # Kalau tidak ada improvement signifikan, balik ke 0
+    if best_corr < min_correlation:
+        return 0, 0.0
+    
+    return best_lag, best_corr

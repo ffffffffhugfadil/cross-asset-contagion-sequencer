@@ -1,22 +1,14 @@
+# backtest/__init__.py
 """
-backtest package - Historical event validation and metrics
+Backtest module for Cross-Asset Contagion Sequencer.
 """
 
-from .runner import (
-    run_backtest,
-    load_event_data,
-)
-
-from .metrics import (
-    calculate_sequence_accuracy,
-    calculate_early_warning_hours,
-    calculate_false_positive_rate,
-)
+from .events_config import EVENTS, get_all_events
+from .outcome_extractor import find_stress_onset_index, compute_actual_order
 
 __all__ = [
-    "run_backtest",
-    "load_event_data",
-    "calculate_sequence_accuracy",
-    "calculate_early_warning_hours",
-    "calculate_false_positive_rate",
+    'EVENTS',
+    'get_all_events',
+    'find_stress_onset_index',
+    'compute_actual_order',
 ]

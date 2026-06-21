@@ -1,7 +1,7 @@
 {
   "name": "cross_asset_contagion_sequencer",
   "version": "1.0.0",
-  "description": "Predicts the sequence, timing, and severity of crypto market contagion before it spreads. Achieved 93.3% accuracy across $800B+ market cap loss events with 0% false positives and 2.33h average early warning.",
+  "description": "Predicts the sequence, timing, and severity of crypto market contagion before it spreads. Achieved 73.6% accuracy across 12 real events (2017-2025) with 7 events at 100% and 0% false positives.",
   "author": "HugenOG",
   "license": "MIT",
   "inputs": {
@@ -72,6 +72,21 @@
     "Binance Public API (historical OHLCV - free, no API key)",
     "CoinMarketCap API (optional - for OI and funding rate amplification)"
   ],
+  "backtest_results": {
+    "events_tested": 12,
+    "average_accuracy": "73.6%",
+    "perfect_events": 7,
+    "failed_events": 0,
+    "perfect_events_list": [
+      "3AC/Celsius Contagion (Jun 2022)",
+      "USDC Depeg / SVB (Mar 2023)",
+      "COVID Black Thursday (Mar 2020)",
+      "Ronin Bridge Hack (Mar 2022)",
+      "China ICO Ban (Sep 2017)",
+      "Poly Network Hack (Aug 2021)",
+      "Bybit Hack (Feb 2025)"
+    ]
+  },
   "tags": ["contagion", "prediction", "risk-management", "cross-asset", "sequencer"],
   "category": "Market Intelligence"
 }

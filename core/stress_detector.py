@@ -144,3 +144,33 @@ def identify_stress_peak(
     distance_from_end = len(recent) - 1 - peak_index
     
     return distance_from_end, peak_price
+
+
+def detect_stress_with_onset(
+    returns: list,
+    lookback_hours: int = 6,
+    threshold: float = -0.05,
+) -> tuple:
+    """
+    Same as detect_stress but also returns onset_idx.
+    
+    Returns:
+        Tuple of (detected, severity, magnitude, onset_idx)
+    """
+    windows = [3, 6, 12, 24]
+    
+    for w in windows:
+        if len(returns) < w:
+            continue
+        for i in range(w, len(returns)):
+            cumulative = sum(returns[i-w:i])
+            if cumulative <= threshold:
+                if cumulative <= threshold * 2:
+                    severity = "CRITICAL"
+                elif cumulative <= threshold * 1.5:
+                    severity = "HIGH"
+                else:
+                    severity = "MEDIUM"
+                return True, severity, abs(cumulative), i
+    
+    return False, "NONE", 0.0, len(returns) - 1
