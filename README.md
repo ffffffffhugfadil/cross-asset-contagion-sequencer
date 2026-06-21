@@ -38,12 +38,12 @@ SOURCE STRESS DETECTED
               │
               ▼
   ┌─────────────────────────────────────┐
-  │  1. Detect stress onset              │
-  │  2. Compute cross-correlation lags   │
-  │     (0–48h window) per target        │
-  │  3. Sort by lag → ranked sequence    │
-  │  4. Score impact (OI + funding)      │
-  │  5. Assign actionable signals        │
+  │  1. Detect stress onset             │
+  │  2. Compute cross-correlation lags  │
+  │     (0–48h window) per target       │
+  │  3. Sort by lag → ranked sequence   │
+  │  4. Score impact (OI + funding)     │
+  │  5. Assign actionable signals       │
   └─────────────────────────────────────┘
               │
               ▼
