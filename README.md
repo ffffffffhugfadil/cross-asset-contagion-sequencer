@@ -35,12 +35,12 @@ SOURCE STRESS DETECTED
             │
             ▼
   ┌─────────────────────────────────┐
-  │  1. Detect stress onset          │
-  │  2. Compute cross-correlation    │
-  │     lags (0–48h) per target      │
-  │  3. Sort by lag → sequence       │
-  │  4. Score impact (OI amplifier)  │
-  │  5. Assign signals               │
+  │  1. Detect stress onset         │
+  │  2. Compute cross-correlation   │
+  │     lags (0–48h) per target     │
+  │  3. Sort by lag → sequence      │
+  │  4. Score impact (OI amplifier) │
+  │  5. Assign signals              │
   └─────────────────────────────────┘
             │
             ▼
