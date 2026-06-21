@@ -1,6 +1,54 @@
-.Rhistory
+# macOS
 .DS_Store
-.env
-*.pyc
+.AppleDouble
+.LSOverride
+
+# Python
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Environment Variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Cache
+data/cache/
+backtest/cache/
+.cache/
+
+# Test coverage
+htmlcov/
+.coverage
+.pytest_cache/
+
+# Charts (optional, bisa di-regenerate)
 demo/images/*.png
+
+# ZIP
+*.zip
+*.tar.gz
+
+# Git
+*.orig
